@@ -6,7 +6,7 @@
 <title>Snake — by Annie</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0 }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent }
 body {
   background: #1a0a12;
   display: flex;
@@ -16,9 +16,11 @@ body {
   min-height: 100vh;
   font-family: 'Space Grotesk', sans-serif;
   color: #fce4ec;
-  gap: 20px;
+  gap: 16px;
+  padding: 20px 0;
+  touch-action: none;
 }
-h1 { font-size: 32px; font-weight: 700; letter-spacing: -1px; color: #f48fb1 }
+h1 { font-size: 28px; font-weight: 700; letter-spacing: -1px; color: #f48fb1 }
 h1 span { color: #fce4ec; font-weight: 400 }
 .stats { display: flex; gap: 32px }
 .stat { text-align: center }
@@ -26,14 +28,49 @@ h1 span { color: #fce4ec; font-weight: 400 }
 .stat-val { font-size: 24px; font-weight: 700; color: #fce4ec }
 .screen { border: 2px solid #880e4f; border-radius: 4px; background: #2d0a1e; padding: 4px; box-shadow: 0 0 40px rgba(244,143,177,0.15) }
 canvas { display: block }
-.controls { display: grid; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); gap: 4px }
-.ctrl-btn { background: #2d0a1e; border: 1px solid #880e4f; border-radius: 8px; color: #f48fb1; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.1s; user-select: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; min-width: 44px; min-height: 44px }
-.ctrl-btn:active { background: #4a0a2e }
-.ctrl-center { border-radius: 50%; font-size: 13px; font-weight: 700; color: #fce4ec; letter-spacing: 0.5px }
+.controls { display: grid; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(3, 56px); gap: 6px; margin-top: 4px }
+.ctrl-btn {
+  background: #2d0a1e;
+  border: 1.5px solid #880e4f;
+  border-radius: 10px;
+  color: #f48fb1;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: background 0.08s;
+  -webkit-user-select: none;
+}
+.ctrl-btn:active { background: #5a0a3a }
+.ctrl-center {
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fce4ec;
+  border-color: #c2185b;
+}
 .status { font-size: 13px; color: #f48fb1; opacity: 0.8; letter-spacing: 0.5px; min-height: 18px; text-align: center }
-.new-btn { padding: 8px 28px; background: transparent; border: 1px solid #f48fb1; border-radius: 20px; color: #f48fb1; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'Space Grotesk', sans-serif; letter-spacing: 0.5px; transition: all 0.15s }
-.new-btn:hover { background: #f48fb1; color: #1a0a12 }
-.made-by { font-size: 12px; color: #f48fb1; opacity: 0.4; letter-spacing: 1px; text-transform: uppercase }
+.new-btn {
+  padding: 10px 32px;
+  background: transparent;
+  border: 1.5px solid #f48fb1;
+  border-radius: 20px;
+  color: #f48fb1;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: 0.5px;
+  touch-action: manipulation;
+}
+.new-btn:active { background: #f48fb1; color: #1a0a12 }
+.made-by { font-size: 11px; color: #f48fb1; opacity: 0.35; letter-spacing: 1px; text-transform: uppercase }
+.leaderboard { font-size: 13px; color: #f48fb1; opacity: 0.8; letter-spacing: 0.5px; text-align: center; margin-bottom: 6px }
+.lb-name { font-weight: 700; color: #fce4ec }
+.lb-score { font-weight: 700; color: #fce4ec }
 </style>
 </head>
 <body>
@@ -45,82 +82,83 @@ canvas { display: block }
   <div class="stat"><div class="stat-label">Level</div><div class="stat-val" id="level">1</div></div>
 </div>
 
+<div class="leaderboard">Highest Score: <span class="lb-name">Aman</span> — <span class="lb-score">350</span></div>
 <div class="screen"><canvas id="c" width="240" height="200"></canvas></div>
 
 <div class="controls">
   <div></div>
-  <button class="ctrl-btn" onclick="dir(0,-1)">↑</button>
+  <div class="ctrl-btn" id="btn-up">↑</div>
   <div></div>
-  <button class="ctrl-btn" onclick="dir(-1,0)">←</button>
-  <button class="ctrl-btn ctrl-center" ontouchstart="togglePause()" onclick="togglePause()" id="pause-btn">II</button>
-  <button class="ctrl-btn" onclick="dir(1,0)">→</button>
+  <div class="ctrl-btn" id="btn-left">←</div>
+  <div class="ctrl-btn ctrl-center" id="btn-pause">II</div>
+  <div class="ctrl-btn" id="btn-right">→</div>
   <div></div>
-  <button class="ctrl-btn" onclick="dir(0,1)">↓</button>
+  <div class="ctrl-btn" id="btn-down">↓</div>
   <div></div>
 </div>
 
-<div class="status" id="status">tap d-pad or use arrow keys to start</div>
-<button class="new-btn" onclick="restart()">new game</button>
+<div class="status" id="status">swipe or tap arrows to start</div>
+<div class="ctrl-btn new-btn" id="btn-new" style="border-radius:20px;width:auto;padding:10px 32px;font-size:15px;border-color:#f48fb1;color:#f48fb1;">new game</div>
 <div class="made-by">made with ♥ in gurugram</div>
 
 <script>
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
-const COLS = 24, ROWS = 20, SZ = 10;
-const BG = '#2d0a1e', GRID = '#330d22', HEAD = '#f48fb1', BODY = '#ad1457', BODY2 = '#c2185b';
+const COLS=24,ROWS=20,SZ=10;
+const BG='#2d0a1e',GRID='#330d22',HEAD='#f48fb1',BODY='#ad1457',BODY2='#c2185b';
 
-let snake, dx, dy, ndx, ndy, food, score, hi=0, state, loop, speed, paused, level;
+let snake,dx,dy,ndx,ndy,food,score,hi=0,state,loop,speed,paused,level;
 
-function init() {
+function init(){
   snake=[{x:12,y:10},{x:11,y:10},{x:10,y:10}];
   dx=1;dy=0;ndx=1;ndy=0;score=0;speed=140;paused=false;level=1;state='play';
   placeFood();updateUI();clearInterval(loop);loop=setInterval(tick,speed);
-  document.getElementById('pause-btn').textContent='II';
+  document.getElementById('btn-pause').textContent='II';
   document.getElementById('status').textContent='';
 }
 
-function placeFood() {
+function placeFood(){
   let pos;
   do{pos={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*ROWS)}}
   while(snake.some(s=>s.x===pos.x&&s.y===pos.y));
   food=pos;
 }
 
-function drawHeart(x, y) {
-  const cx = x*SZ + SZ/2, cy = y*SZ + SZ/2 + 0.5;
-  ctx.fillStyle = '#f48fb1';
+function drawHeart(x,y){
+  const cx=x*SZ+SZ/2,cy=y*SZ+SZ/2+0.5;
+  ctx.fillStyle='#f48fb1';
   ctx.beginPath();
-  ctx.moveTo(cx, cy + 3.5);
-  ctx.bezierCurveTo(cx - 5, cy, cx - 5, cy - 3, cx, cy - 2);
-  ctx.bezierCurveTo(cx + 5, cy - 3, cx + 5, cy, cx, cy + 3.5);
+  ctx.moveTo(cx,cy+3.5);
+  ctx.bezierCurveTo(cx-5,cy,cx-5,cy-3,cx,cy-2);
+  ctx.bezierCurveTo(cx+5,cy-3,cx+5,cy,cx,cy+3.5);
   ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillStyle='rgba(255,255,255,0.4)';
   ctx.beginPath();
-  ctx.ellipse(cx - 1.5, cy - 1.5, 1.2, 0.7, -0.5, 0, Math.PI*2);
+  ctx.ellipse(cx-1.5,cy-1.5,1.2,0.7,-0.5,0,Math.PI*2);
   ctx.fill();
 }
 
-function tick() {
+function tick(){
   if(state!=='play'||paused)return;
   dx=ndx;dy=ndy;
   const head={x:snake[0].x+dx,y:snake[0].y+dy};
   if(head.x<0||head.x>=COLS||head.y<0||head.y>=ROWS||snake.some(s=>s.x===head.x&&s.y===head.y)){
     state='dead';clearInterval(loop);
     if(score>hi){hi=score;document.getElementById('hi').textContent=hi;}
-    document.getElementById('status').textContent='game over — press new game';
+    document.getElementById('status').textContent='game over!';
     draw();return;
   }
   snake.unshift(head);
   if(head.x===food.x&&head.y===food.y){
     score+=10;
-    const newLevel=Math.floor(score/50)+1;
-    if(newLevel>level){level=newLevel;speed=Math.max(55,140-(level-1)*15);clearInterval(loop);loop=setInterval(tick,speed);}
+    const nl=Math.floor(score/50)+1;
+    if(nl>level){level=nl;speed=Math.max(55,140-(level-1)*15);clearInterval(loop);loop=setInterval(tick,speed);}
     placeFood();
-  } else{snake.pop();}
+  }else{snake.pop();}
   updateUI();draw();
 }
 
-function draw() {
+function draw(){
   ctx.fillStyle=BG;ctx.fillRect(0,0,canvas.width,canvas.height);
   for(let x=0;x<COLS;x++)for(let y=0;y<ROWS;y++){
     if((x+y)%2===0){ctx.fillStyle=GRID;ctx.fillRect(x*SZ,y*SZ,SZ,SZ);}
@@ -136,7 +174,7 @@ function draw() {
       ctx.fillRect(s.x*SZ+ex2,s.y*SZ+ey2,2,2);
     }
   });
-  drawHeart(food.x, food.y);
+  drawHeart(food.x,food.y);
   if(state==='dead'){
     ctx.fillStyle='rgba(26,10,18,0.8)';ctx.fillRect(0,0,canvas.width,canvas.height);
     ctx.fillStyle=HEAD;ctx.font='bold 18px Space Grotesk,sans-serif';ctx.textAlign='center';
@@ -147,33 +185,55 @@ function draw() {
 }
 
 function updateUI(){document.getElementById('score').textContent=score;document.getElementById('level').textContent=level;}
-function dir(x,y){if(state==='dead'){restart();return;}if(state!=='play'){init();}if(x===1&&dx===-1||x===-1&&dx===1||y===1&&dy===-1||y===-1&&dy===1)return;ndx=x;ndy=y;if(paused)togglePause();}
-function togglePause(){if(state==='dead')return;if(state!=='play'){init();return;}paused=!paused;document.getElementById('pause-btn').textContent=paused?'▶':'II';document.getElementById('status').textContent=paused?'paused':'';}
-function restart(){init();}
+
+function move(x,y){
+  if(state==='dead'){init();return;}
+  if(state!=='play'){init();}
+  if(x===1&&dx===-1||x===-1&&dx===1||y===1&&dy===-1||y===-1&&dy===1)return;
+  ndx=x;ndy=y;
+  if(paused)togglePause();
+}
+
+function togglePause(){
+  if(state==='dead')return;
+  if(state!=='play'){init();return;}
+  paused=!paused;
+  document.getElementById('btn-pause').textContent=paused?'▶':'II';
+  document.getElementById('status').textContent=paused?'paused':'';
+}
+
+function addBtn(id,fn){
+  const el=document.getElementById(id);
+  el.addEventListener('touchstart',function(e){e.preventDefault();e.stopPropagation();fn();},{passive:false});
+  el.addEventListener('mousedown',function(e){e.preventDefault();fn();});
+}
+
+addBtn('btn-up',()=>move(0,-1));
+addBtn('btn-down',()=>move(0,1));
+addBtn('btn-left',()=>move(-1,0));
+addBtn('btn-right',()=>move(1,0));
+addBtn('btn-pause',togglePause);
+addBtn('btn-new',()=>init());
 
 document.addEventListener('keydown',e=>{
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();
-  if(e.key==='ArrowUp')dir(0,-1);else if(e.key==='ArrowDown')dir(0,1);
-  else if(e.key==='ArrowLeft')dir(-1,0);else if(e.key==='ArrowRight')dir(1,0);
+  if(e.key==='ArrowUp')move(0,-1);
+  else if(e.key==='ArrowDown')move(0,1);
+  else if(e.key==='ArrowLeft')move(-1,0);
+  else if(e.key==='ArrowRight')move(1,0);
   else if(e.key===' ')togglePause();
 });
 
+let tx=0,ty=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+document.addEventListener('touchend',e=>{
+  const ddx=e.changedTouches[0].clientX-tx,ddy=e.changedTouches[0].clientY-ty;
+  if(Math.max(Math.abs(ddx),Math.abs(ddy))<25)return;
+  if(Math.abs(ddx)>Math.abs(ddy))move(ddx>0?1:-1,0);
+  else move(0,ddy>0?1:-1);
+},{passive:true});
+
 init();draw();
-
-let touchStartX = 0, touchStartY = 0;
-document.addEventListener('touchstart', e => {
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-}, {passive: true});
-document.addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].clientX - touchStartX;
-  const dy = e.changedTouches[0].clientY - touchStartY;
-  const absDx = Math.abs(dx), absDy = Math.abs(dy);
-  if (Math.max(absDx, absDy) < 20) return;
-  if (absDx > absDy) { dir(dx > 0 ? 1 : -1, 0); }
-  else { dir(0, dy > 0 ? 1 : -1); }
-}, {passive: true});
-
 </script>
 </body>
 </html>
