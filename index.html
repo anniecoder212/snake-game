@@ -28,30 +28,6 @@ h1 span { color: #fce4ec; font-weight: 400 }
 .stat-val { font-size: 24px; font-weight: 700; color: #fce4ec }
 .screen { border: 2px solid #880e4f; border-radius: 4px; background: #2d0a1e; padding: 4px; box-shadow: 0 0 40px rgba(244,143,177,0.15) }
 canvas { display: block }
-.controls { display: grid; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(3, 56px); gap: 6px; margin-top: 4px }
-.ctrl-btn {
-  background: #2d0a1e;
-  border: 1.5px solid #880e4f;
-  border-radius: 10px;
-  color: #f48fb1;
-  font-size: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  user-select: none;
-  touch-action: manipulation;
-  transition: background 0.08s;
-  -webkit-user-select: none;
-}
-.ctrl-btn:active { background: #5a0a3a }
-.ctrl-center {
-  border-radius: 50%;
-  font-size: 13px;
-  font-weight: 700;
-  color: #fce4ec;
-  border-color: #c2185b;
-}
 .status { font-size: 13px; color: #f48fb1; opacity: 0.8; letter-spacing: 0.5px; min-height: 18px; text-align: center }
 .new-btn {
   padding: 10px 32px;
@@ -67,6 +43,7 @@ canvas { display: block }
   touch-action: manipulation;
 }
 .new-btn:active { background: #f48fb1; color: #1a0a12 }
+.instructions { font-size: 13px; color: #f48fb1; opacity: 0.7; text-align: center; margin-bottom: 4px; letter-spacing: 0.3px }
 .made-by { font-size: 11px; color: #f48fb1; opacity: 0.35; letter-spacing: 1px; text-transform: uppercase }
 .leaderboard { font-size: 13px; color: #f48fb1; opacity: 0.8; letter-spacing: 0.5px; text-align: center; margin-bottom: 6px }
 .lb-name { font-weight: 700; color: #fce4ec }
@@ -83,28 +60,27 @@ canvas { display: block }
 </div>
 
 <div class="leaderboard">Highest Score: <span class="lb-name">Aman</span> — <span class="lb-score">350</span></div>
-<div class="screen"><canvas id="c" width="240" height="200"></canvas></div>
+<div class="screen"><canvas id="c" width="300" height="260"></canvas></div>
 
-<div class="controls">
+  
   <div></div>
-  <div class="ctrl-btn" id="btn-up">↑</div>
+  
+  
+  
   <div></div>
-  <div class="ctrl-btn" id="btn-left">←</div>
-  <div class="ctrl-btn ctrl-center" id="btn-pause">II</div>
-  <div class="ctrl-btn" id="btn-right">→</div>
-  <div></div>
-  <div class="ctrl-btn" id="btn-down">↓</div>
+  
   <div></div>
 </div>
 
-<div class="status" id="status">swipe or tap arrows to start</div>
+<div class="instructions">For your laptop: use arrow keys &nbsp;|&nbsp; On your phone: just swipe</div>
+<div class="status" id="status"></div>
 <div class="ctrl-btn new-btn" id="btn-new" style="border-radius:20px;width:auto;padding:10px 32px;font-size:15px;border-color:#f48fb1;color:#f48fb1;">new game</div>
 <div class="made-by">made with ♥ in gurugram</div>
 
 <script>
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
-const COLS=24,ROWS=20,SZ=10;
+const COLS=30,ROWS=26,SZ=10;
 const BG='#2d0a1e',GRID='#330d22',HEAD='#f48fb1',BODY='#ad1457',BODY2='#c2185b';
 
 let snake,dx,dy,ndx,ndy,food,score,hi=0,state,loop,speed,paused,level;
@@ -113,7 +89,7 @@ function init(){
   snake=[{x:12,y:10},{x:11,y:10},{x:10,y:10}];
   dx=1;dy=0;ndx=1;ndy=0;score=0;speed=140;paused=false;level=1;state='play';
   placeFood();updateUI();clearInterval(loop);loop=setInterval(tick,speed);
-  document.getElementById('btn-pause').textContent='II';
+  
   document.getElementById('status').textContent='';
 }
 
@@ -126,15 +102,16 @@ function placeFood(){
 
 function drawHeart(x,y){
   const cx=x*SZ+SZ/2,cy=y*SZ+SZ/2+0.5;
+  const s=1.4;
   ctx.fillStyle='#f48fb1';
   ctx.beginPath();
-  ctx.moveTo(cx,cy+3.5);
-  ctx.bezierCurveTo(cx-5,cy,cx-5,cy-3,cx,cy-2);
-  ctx.bezierCurveTo(cx+5,cy-3,cx+5,cy,cx,cy+3.5);
+  ctx.moveTo(cx,cy+4*s);
+  ctx.bezierCurveTo(cx-6*s,cy,cx-6*s,cy-4*s,cx,cy-2.5*s);
+  ctx.bezierCurveTo(cx+6*s,cy-4*s,cx+6*s,cy,cx,cy+4*s);
   ctx.fill();
-  ctx.fillStyle='rgba(255,255,255,0.4)';
+  ctx.fillStyle='rgba(255,255,255,0.45)';
   ctx.beginPath();
-  ctx.ellipse(cx-1.5,cy-1.5,1.2,0.7,-0.5,0,Math.PI*2);
+  ctx.ellipse(cx-2,cy-2,1.8,1,-.5,0,Math.PI*2);
   ctx.fill();
 }
 
@@ -198,22 +175,9 @@ function togglePause(){
   if(state==='dead')return;
   if(state!=='play'){init();return;}
   paused=!paused;
-  document.getElementById('btn-pause').textContent=paused?'▶':'II';
+  
   document.getElementById('status').textContent=paused?'paused':'';
 }
-
-function addBtn(id,fn){
-  const el=document.getElementById(id);
-  el.addEventListener('touchstart',function(e){e.preventDefault();e.stopPropagation();fn();},{passive:false});
-  el.addEventListener('mousedown',function(e){e.preventDefault();fn();});
-}
-
-addBtn('btn-up',()=>move(0,-1));
-addBtn('btn-down',()=>move(0,1));
-addBtn('btn-left',()=>move(-1,0));
-addBtn('btn-right',()=>move(1,0));
-addBtn('btn-pause',togglePause);
-addBtn('btn-new',()=>init());
 
 document.addEventListener('keydown',e=>{
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();
