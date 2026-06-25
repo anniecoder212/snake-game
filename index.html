@@ -74,7 +74,7 @@ canvas { display: block }
 
 <div class="instructions">For your laptop: use arrow keys &nbsp;|&nbsp; On your phone: just swipe</div>
 <div class="status" id="status"></div>
-<div class="ctrl-btn new-btn" id="btn-new" style="border-radius:20px;width:auto;padding:10px 32px;font-size:15px;border-color:#f48fb1;color:#f48fb1;">new game</div>
+<button class="new-btn" onclick="restart()" style="margin-top:8px">new game</button>
 <div class="made-by">made with ♥ in gurugram</div>
 
 <script>
@@ -198,6 +198,7 @@ document.addEventListener('touchend',e=>{
 },{passive:true});
 
 init();draw();
+function restart(){init();}
 </script>
 </body>
 </html>
